@@ -18,7 +18,7 @@ defmodule Aoc.DayGeneratorTest do
 
   describe "find_and_append_moduledocs/2" do
     test "appends the string to the moduledocs" do
-      result = DayGenerator.find_and_append_moduledocs(simple_docs(), "\n  ## Test")
+      result = DayGenerator.find_and_append_moduledocs(simple_docs(), "\n  ## Test    ")
 
       assert result =~ "  ## Test"
     end
