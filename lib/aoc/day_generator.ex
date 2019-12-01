@@ -213,8 +213,8 @@ defmodule Aoc.DayGenerator do
   def find_and_append_moduledocs(body, docs) do
     [{first, _length} | _] = Regex.run(~r/  """\n/, body, return: :index)
 
-    {part_1, part_2} = String.split_at(body, first-8)
+    {part_1, part_2} = String.split_at(body, first - 8)
 
-    part_1 <> "\n"<> String.slice(docs, 0..-3) <> part_2
+    part_1 <> "\n" <> String.slice(docs, 0..-3) <> part_2
   end
 end
