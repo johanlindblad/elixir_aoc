@@ -219,24 +219,28 @@ defmodule Aoc.DayGenerator do
   end
 
   defp file_name(title) do
-    title = case Integer.parse(title) do
-      {_number, rest} ->
-        rest
-      :error ->
-        title
-    end
+    title =
+      case Integer.parse(title) do
+        {_number, rest} ->
+          rest
 
-    title |> String.trim |> String.replace(" ", "_") |> String.downcase()
+        :error ->
+          title
+      end
+
+    title |> String.trim() |> String.replace(" ", "_") |> String.downcase()
   end
 
   defp module_name(title) do
-    title = case Integer.parse(title) do
-      {_number, rest} ->
-        rest
-      :error ->
-        title
-    end
+    title =
+      case Integer.parse(title) do
+        {_number, rest} ->
+          rest
 
-    title |> String.trim |> String.replace(" ", "") |> String.trim()
+        :error ->
+          title
+      end
+
+    title |> String.trim() |> String.replace(" ", "") |> String.trim()
   end
 end
