@@ -48,7 +48,7 @@ defmodule Aoc.DayGenerator do
 
   defp read_day_file({day, year, body}) do
     title = title_from_body(body)
-    file_name = title |> String.replace(" ", "_") |> String.downcase()
+    file_name = file_name(title)
 
     "#{file_folder(day, year)}/#{file_name}.ex"
     |> File.read!()
@@ -56,7 +56,7 @@ defmodule Aoc.DayGenerator do
 
   defp write_day_file({day, year, body}, content) do
     title = title_from_body(body)
-    file_name = title |> String.replace(" ", "_") |> String.downcase()
+    file_name = file_name(title)
     File.write!("#{file_folder(day, year)}/#{file_name}.ex", content)
   end
 
@@ -74,7 +74,7 @@ defmodule Aoc.DayGenerator do
 
   defp generate_day_file({day, year, body}) do
     title = title_from_body(body)
-    module_name = title |> String.replace(" ", "") |> String.trim()
+    module_name = module_name(title)
 
     content =
       EEx.eval_file("priv/templates/main_module.eex",
@@ -94,8 +94,8 @@ defmodule Aoc.DayGenerator do
 
   defp generate_test({day, year, body}) do
     title = title_from_body(body)
-    file_name = title |> String.replace(" ", "_") |> String.downcase()
-    module_name = title |> String.replace(" ", "") |> String.trim()
+    file_name = file_name(title)
+    module_name = module_name(title)
 
     content =
       EEx.eval_file("priv/templates/test_file.eex",
@@ -216,5 +216,27 @@ defmodule Aoc.DayGenerator do
     {part_1, part_2} = String.split_at(body, first - 8)
 
     part_1 <> "\n" <> String.slice(docs, 0..-3) <> part_2
+  end
+
+  defp file_name(title) do
+    title = case Integer.parse(title) do
+      {_number, rest} ->
+        rest
+      :error ->
+        title
+    end
+
+    title |> String.trim |> String.replace(" ", "_") |> String.downcase()
+  end
+
+  defp module_name(title) do
+    title = case Integer.parse(title) do
+      {_number, rest} ->
+        rest
+      :error ->
+        title
+    end
+
+    title |> String.trim |> String.replace(" ", "") |> String.trim()
   end
 end
