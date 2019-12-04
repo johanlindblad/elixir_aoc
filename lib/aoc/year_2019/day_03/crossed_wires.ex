@@ -136,7 +136,7 @@ defmodule Aoc.Year2019.Day03.CrossedWires do
           {nil, 0} ->
             {Map.put(matrix, {x, y}, Map.put(%{}, wire_number, steps)), overlaps}
 
-          {nil, size} ->
+          {nil, _size} ->
             {Map.put(matrix, {x, y}, Map.put(history, wire_number, steps)), [{x, y} | overlaps]}
 
           {_some_steps, 1} ->
