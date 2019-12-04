@@ -48,16 +48,6 @@ defmodule Aoc.Year2019.Day04.SecureContainer do
     |> Enum.count(fn i -> has_double(i) && never_decreases(i) end)
   end
 
-  def all_matching(from, to, num_matching \\ 0)
-  def all_matching(from, from, num_matching), do: num_matching
-
-  def all_matching(from, to, num_matching) do
-    case has_double(from) && never_decreases(from) do
-      true -> all_matching(from + 1, to, num_matching + 1)
-      false -> all_matching(from + 1, to, num_matching)
-    end
-  end
-
   defp has_double(from) when is_integer(from),
     do: has_double(from |> Integer.digits())
 
