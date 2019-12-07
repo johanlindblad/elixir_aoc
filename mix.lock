@@ -1,6 +1,7 @@
 %{
   "array": {:hex, :array, "1.0.1", "c0ae92d35e891e56f80b605b77c2dba6972302f7716719eee0b5417162c695b0", [:mix], [], "hexpm"},
   "arrays": {:hex, :arrays, "0.1.0", "63b9160c5b2eb6bec0bdc31ed8b026cd420a4c4433ea0ad4b1cab0a776ba7a9c", [:mix], [{:extractable, "~> 0.2", [hex: :extractable, repo: "hexpm", optional: false]}, {:fun_land, "~> 0.9.0", [hex: :fun_land, repo: "hexpm", optional: false]}, {:insertable, "~> 0.2", [hex: :insertable, repo: "hexpm", optional: false]}], "hexpm"},
+  "brute": {:hex, :brute, "0.1.0", "3bd1ed9271ac888b5eed04685e838a19fd339e96ba73dddb9c90a88713f23edb", [:mix], [], "hexpm"},
   "certifi": {:hex, :certifi, "2.5.1", "867ce347f7c7d78563450a18a6a28a8090331e77fa02380b4a21962a65d36ee5", [:rebar3], [{:parse_trans, "~>3.3", [hex: :parse_trans, repo: "hexpm", optional: false]}], "hexpm"},
   "coerce": {:hex, :coerce, "1.0.1", "211c27386315dc2894ac11bc1f413a0e38505d808153367bd5c6e75a4003d096", [:mix], [], "hexpm"},
   "currying": {:hex, :currying, "1.0.3", "6d036c86c38663a795858c9e744e406a62d7e5a66243a7da15326e731cdcd672", [:mix], [], "hexpm"},

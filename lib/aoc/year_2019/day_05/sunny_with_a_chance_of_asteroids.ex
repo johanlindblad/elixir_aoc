@@ -97,7 +97,8 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
   def part_1(input) do
     program = input |> parse
 
-    program |> step([1])
+    {:halt, outputs, _program, _pc} = program |> step([1])
+    outputs
   end
 
   def step(program, inputs, outputs \\ [], pc \\ 0) do
@@ -120,10 +121,16 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
         step(program, inputs, outputs, pc + 4)
 
       3 ->
-        {_opa, _opb, opc} = read_operands(program, pc, 3)
-        [input | inputs] = inputs
-        program = Arrays.set(program, opc, input)
-        step(program, inputs, outputs, pc + 2)
+        {opa} = read_operands(program, pc, 1)
+
+        case inputs do
+          [input | inputs] ->
+            program = Arrays.set(program, opa, input)
+            step(program, inputs, outputs, pc + 2)
+
+          [] ->
+            {:needs_input, outputs, program, pc}
+        end
 
       4 ->
         {opa} = read_operands(program, pc, 1)
@@ -175,7 +182,7 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
         step(program, inputs, outputs, pc + 4)
 
       99 ->
-        outputs
+        {:halt, outputs, program, pc}
     end
   end
 
@@ -200,10 +207,11 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
   def part_2(input) do
     program = input |> parse
 
-    program |> step([5])
+    {:halt, outputs, _program, _pc} = program |> step([5])
+    outputs
   end
 
-  defp parse(input) do
+  def parse(input) do
     input
     |> String.split(",")
     |> Enum.map(&String.to_integer/1)
