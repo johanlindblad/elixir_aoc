@@ -12,7 +12,7 @@ defmodule Aoc.Year2019.Day07.AmplificationCircuitTest do
         |> Enum.map(&String.to_integer/1)
         |> Arrays.new()
 
-      assert AmplificationCircuit.run([[4, 3, 2, 1, 0]], program) == 43210
+      assert AmplificationCircuit.run_1([[4, 3, 2, 1, 0]], program) == 43210
     end
 
     @tag day: 07, year: 2019

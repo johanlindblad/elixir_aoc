@@ -97,8 +97,21 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
   def part_1(input) do
     program = input |> parse
 
-    {:halt, outputs, _program, _pc} = program |> step([1])
+    {:halt, outputs} = program |> run([1])
     outputs
+  end
+
+  def run(program, inputs, outputs \\ [], pc \\ 0) do
+    case step(program, inputs, outputs, pc) do
+      {:continue, program, inputs, outputs, pc} ->
+        run(program, inputs, outputs, pc)
+
+      {:halt, outputs, _program, _pc} ->
+        {:halt, outputs}
+
+      {:needs_input, outputs, program, pc} ->
+        {:needs_input, outputs, program, pc}
+    end
   end
 
   def step(program, inputs, outputs \\ [], pc \\ 0) do
@@ -111,14 +124,14 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
         a = read(program, opa, mode1)
         b = read(program, opb, mode2)
         program = Arrays.set(program, opc, a + b)
-        step(program, inputs, outputs, pc + 4)
+        {:continue, program, inputs, outputs, pc + 4}
 
       2 ->
         {opa, opb, opc} = read_operands(program, pc, 3)
         a = read(program, opa, mode1)
         b = read(program, opb, mode2)
         program = Arrays.set(program, opc, a * b)
-        step(program, inputs, outputs, pc + 4)
+        {:continue, program, inputs, outputs, pc + 4}
 
       3 ->
         {opa} = read_operands(program, pc, 1)
@@ -126,7 +139,7 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
         case inputs do
           [input | inputs] ->
             program = Arrays.set(program, opa, input)
-            step(program, inputs, outputs, pc + 2)
+            {:continue, program, inputs, outputs, pc + 2}
 
           [] ->
             {:needs_input, outputs, program, pc}
@@ -135,7 +148,7 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
       4 ->
         {opa} = read_operands(program, pc, 1)
         outputs = [read(program, opa, mode1)]
-        step(program, inputs, outputs, pc + 2)
+        {:continue, program, inputs, outputs, pc + 2}
 
       5 ->
         {opa, opb} = read_operands(program, pc, 2)
@@ -147,7 +160,7 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
             false -> pc + 3
           end
 
-        step(program, inputs, outputs, pc)
+        {:continue, program, inputs, outputs, pc}
 
       6 ->
         {opa, opb} = read_operands(program, pc, 2)
@@ -159,7 +172,7 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
             true -> pc + 3
           end
 
-        step(program, inputs, outputs, pc)
+        {:continue, program, inputs, outputs, pc}
 
       7 ->
         {opa, opb, opc} = read_operands(program, pc, 3)
@@ -169,7 +182,7 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
         lt = if a < b, do: 1, else: 0
         program = Arrays.set(program, opc, lt)
 
-        step(program, inputs, outputs, pc + 4)
+        {:continue, program, inputs, outputs, pc + 4}
 
       8 ->
         {opa, opb, opc} = read_operands(program, pc, 3)
@@ -179,7 +192,7 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
         eq = if a == b, do: 1, else: 0
         program = Arrays.set(program, opc, eq)
 
-        step(program, inputs, outputs, pc + 4)
+        {:continue, program, inputs, outputs, pc + 4}
 
       99 ->
         {:halt, outputs, program, pc}
@@ -207,7 +220,7 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
   def part_2(input) do
     program = input |> parse
 
-    {:halt, outputs, _program, _pc} = program |> step([5])
+    {:halt, outputs} = program |> run([5])
     outputs
   end
 

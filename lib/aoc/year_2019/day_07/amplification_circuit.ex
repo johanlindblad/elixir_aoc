@@ -74,7 +74,7 @@ defmodule Aoc.Year2019.Day07.AmplificationCircuit do
   def part_1(input) do
     program = input |> parse
 
-    permutations([4, 3, 2, 1, 0]) |> Enum.to_list() |> run(program)
+    permutations([4, 3, 2, 1, 0]) |> Enum.to_list() |> run_1(program)
   end
 
   def permutations([]), do: [[]]
@@ -82,17 +82,22 @@ defmodule Aoc.Year2019.Day07.AmplificationCircuit do
   def permutations(list),
     do: for(elem <- list, rest <- permutations(list -- [elem]), do: [elem | rest])
 
-  def run(combinations, program, max \\ 0)
-  def run([], _program, max), do: max
+  def run_1(combinations, program, max \\ 0)
+  def run_1([], _program, max), do: max
 
-  def run([parameters | tail], program, max) do
+  def run_1([parameters | tail], program, max) do
     output =
       Enum.reduce(parameters, 0, fn parameter, input ->
-        {_, [out], _, _} = step(program, [parameter, input])
-        out
+        case run(program, [parameter, input]) do
+          {:needs_input, [out], _, _} ->
+            out
+
+          {:halt, [out]} ->
+            out
+        end
       end)
 
-    run(tail, program, Enum.max([max, output]))
+    run_1(tail, program, Enum.max([max, output]))
   end
 
   @doc """
@@ -124,11 +129,11 @@ defmodule Aoc.Year2019.Day07.AmplificationCircuit do
                                                      {input, programs, pcs, _halt} ->
         inputs = if init, do: [parameter, input], else: [input]
 
-        case step(program, inputs, [], pc) do
+        case run(program, inputs, [], pc) do
           {:needs_input, [out], program, pc} ->
             {out, programs ++ [program], pcs ++ [pc], false}
 
-          {:halt, [out], program, _pc} ->
+          {:halt, [out]} ->
             {out, programs ++ [program], pcs ++ [0], true}
         end
       end)
