@@ -64,7 +64,7 @@ defmodule Aoc.Year2019.Day09.SensorBoost do
 
   """
   def part_1(input) do
-    {computer, outputs} =
+    {_computer, outputs} =
       input
       |> IntcodeComputer.parse()
       |> IntcodeComputer.init([1])
@@ -74,158 +74,17 @@ defmodule Aoc.Year2019.Day09.SensorBoost do
     outputs
   end
 
-  def run(program, inputs, outputs \\ [], pc \\ 0, rb \\ 0) do
-    case step(program, inputs, outputs, pc, rb) do
-      {:continue, program, inputs, outputs, pc, rb} ->
-        run(program, inputs, outputs, pc, rb)
-
-      {:halt, outputs, _program, _pc, _rb} ->
-        {:halt, outputs}
-
-      {:needs_input, outputs, program, pc, rb} ->
-        {:needs_input, outputs, program, pc, rb}
-    end
-  end
-
-  def step(program, inputs, outputs \\ [], pc \\ 0, rb \\ 0) do
-    # IO.inspect(program)
-    instruction = Map.get(program, pc)
-    {opcode, mode1, mode2, mode3} = decode(instruction)
-
-    case opcode do
-      1 ->
-        {opa, opb, opc} = read_operands(program, pc, 3)
-        a = read(program, opa, mode1, rb)
-        b = read(program, opb, mode2, rb)
-
-        program = set(program, opc, a + b, mode3, rb)
-        {:continue, program, inputs, outputs, pc + 4, rb}
-
-      2 ->
-        {opa, opb, opc} = read_operands(program, pc, 3)
-        a = read(program, opa, mode1, rb)
-        b = read(program, opb, mode2, rb)
-
-        program = set(program, opc, a * b, mode3, rb)
-        {:continue, program, inputs, outputs, pc + 4, rb}
-
-      3 ->
-        {opa} = read_operands(program, pc, 1)
-
-        case inputs do
-          [input | inputs] ->
-            program = set(program, opa, input, mode1, rb)
-            {:continue, program, inputs, outputs, pc + 2, rb}
-
-          [] ->
-            {:needs_input, outputs, program, pc, rb}
-        end
-
-      4 ->
-        {opa} = read_operands(program, pc, 1)
-        outputs = [read(program, opa, mode1, rb) | outputs]
-        {:continue, program, inputs, outputs, pc + 2, rb}
-
-      5 ->
-        {opa, opb} = read_operands(program, pc, 2)
-        a = read(program, opa, mode1, rb)
-
-        pc =
-          case a != 0 do
-            true -> read(program, opb, mode2, rb)
-            false -> pc + 3
-          end
-
-        {:continue, program, inputs, outputs, pc, rb}
-
-      6 ->
-        {opa, opb} = read_operands(program, pc, 2)
-        a = read(program, opa, mode1, rb)
-
-        pc =
-          case a != 0 do
-            false -> read(program, opb, mode2, rb)
-            true -> pc + 3
-          end
-
-        {:continue, program, inputs, outputs, pc, rb}
-
-      7 ->
-        {opa, opb, opc} = read_operands(program, pc, 3)
-        a = read(program, opa, mode1, rb)
-        b = read(program, opb, mode2, rb)
-
-        lt = if a < b, do: 1, else: 0
-
-        program = set(program, opc, lt, mode3, rb)
-
-        {:continue, program, inputs, outputs, pc + 4, rb}
-
-      8 ->
-        {opa, opb, opc} = read_operands(program, pc, 3)
-        a = read(program, opa, mode1, rb)
-        b = read(program, opb, mode2, rb)
-
-        eq = if a == b, do: 1, else: 0
-
-        program = set(program, opc, eq, mode3, rb)
-
-        {:continue, program, inputs, outputs, pc + 4, rb}
-
-      9 ->
-        {opa} = read_operands(program, pc, 1)
-
-        rb = rb + read(program, opa, mode1, rb)
-
-        {:continue, program, inputs, outputs, pc + 2, rb}
-
-      99 ->
-        {:halt, outputs, program, pc, rb}
-    end
-  end
-
-  def decode(instruction) do
-    opcode = rem(instruction, 100)
-    mode1 = div(instruction, 100) |> rem(10)
-    mode2 = div(instruction, 1000) |> rem(10)
-    mode3 = div(instruction, 10000) |> rem(10)
-
-    {opcode, mode1, mode2, mode3}
-  end
-
-  defp read_operands(program, pc, num) do
-    1..num |> Enum.map(&Map.get(program, pc + &1)) |> List.to_tuple()
-  end
-
-  defp read(program, address, 0, _rb) when address >= 0,
-    do: Map.get(program, address, 0)
-
-  defp read(_program, address, 1, _rb), do: address
-
-  defp read(program, address, 2, rb) when address + rb >= 0,
-    do: Map.get(program, address + rb, 0)
-
-  defp set(program, address, value, 0, _rb) when address >= 0,
-    do: Map.put(program, address, value)
-
-  defp set(program, address, value, 2, rb) when address + rb >= 0,
-    do: Map.put(program, address + rb, value)
-
   @doc """
 
   """
   def part_2(input) do
-    program = input |> parse
+    {_computer, outputs} =
+      input
+      |> IntcodeComputer.parse()
+      |> IntcodeComputer.init([2])
+      |> IntcodeComputer.run()
+      |> IntcodeComputer.consume()
 
-    {:halt, outputs} = program |> run([2])
-    outputs |> Enum.reverse()
-  end
-
-  def parse(input) do
-    input
-    |> String.split(",")
-    |> Enum.map(&String.to_integer/1)
-    |> Enum.with_index()
-    |> Map.new(fn {x, y} -> {y, x} end)
+    outputs
   end
 end
