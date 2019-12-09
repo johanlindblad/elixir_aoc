@@ -131,39 +131,24 @@ defmodule Aoc.Year2019.Day02.ProgramAlarm do
 
   """
 
+  alias Aoc.Year2019.IntcodeComputer
+
   @doc """
 
   """
-  def part_1(input) do
-    input
-    |> parse_program
-    |> modify_program(12, 2)
-    |> run_program
-  end
+  def part_1(input, one \\ 12, two \\ 2) do
+    computer = input |> IntcodeComputer.parse() |> IntcodeComputer.init()
 
-  def run_program(program, pc \\ 0)
+    memory =
+      computer.memory
+      |> Map.put(1, one)
+      |> Map.put(2, two)
 
-  def run_program(program, pc) do
-    opcode = :array.get(pc, program)
+    computer =
+      %{computer | memory: memory}
+      |> IntcodeComputer.run()
 
-    case opcode do
-      99 ->
-        :array.get(0, program)
-
-      1 ->
-        a = :array.get(:array.get(pc + 1, program), program)
-        b = :array.get(:array.get(pc + 2, program), program)
-        c = :array.get(pc + 3, program)
-        program = :array.set(c, a + b, program)
-        run_program(program, pc + 4)
-
-      2 ->
-        a = :array.get(:array.get(pc + 1, program), program)
-        b = :array.get(:array.get(pc + 2, program), program)
-        c = :array.get(pc + 3, program)
-        program = :array.set(c, a * b, program)
-        run_program(program, pc + 4)
-    end
+    Map.get(computer.memory, 0)
   end
 
   @doc """
@@ -172,11 +157,18 @@ defmodule Aoc.Year2019.Day02.ProgramAlarm do
   def part_2(input, noun \\ 0, verb \\ 0)
 
   def part_2(input, noun, verb) do
-    result =
-      input
-      |> parse_program
-      |> modify_program(noun, verb)
-      |> run_program
+    computer = input |> IntcodeComputer.parse() |> IntcodeComputer.init()
+
+    memory =
+      computer.memory
+      |> Map.put(1, noun)
+      |> Map.put(2, verb)
+
+    computer =
+      %{computer | memory: memory}
+      |> IntcodeComputer.run()
+
+    result = computer.memory |> Map.get(0)
 
     case {result, noun, verb} do
       {19_690_720, _, _} ->
@@ -188,18 +180,5 @@ defmodule Aoc.Year2019.Day02.ProgramAlarm do
       {_, _, _} ->
         part_2(input, noun + 1, verb)
     end
-  end
-
-  defp parse_program(input) do
-    input
-    |> String.split(",")
-    |> Enum.map(&String.to_integer/1)
-    |> :array.from_list()
-  end
-
-  defp modify_program(input, noun, verb) do
-    with_noun = :array.set(1, noun, input)
-    with_verb = :array.set(2, verb, with_noun)
-    with_verb
   end
 end

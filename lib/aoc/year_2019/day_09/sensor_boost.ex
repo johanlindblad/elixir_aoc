@@ -58,14 +58,20 @@ defmodule Aoc.Year2019.Day09.SensorBoost do
 
   """
 
+  alias Aoc.Year2019.IntcodeComputer
+
   @doc """
 
   """
   def part_1(input) do
-    program = input |> parse
+    {computer, outputs} =
+      input
+      |> IntcodeComputer.parse()
+      |> IntcodeComputer.init([1])
+      |> IntcodeComputer.run()
+      |> IntcodeComputer.consume()
 
-    {:halt, outputs} = program |> run([1])
-    outputs |> Enum.reverse()
+    outputs
   end
 
   def run(program, inputs, outputs \\ [], pc \\ 0, rb \\ 0) do

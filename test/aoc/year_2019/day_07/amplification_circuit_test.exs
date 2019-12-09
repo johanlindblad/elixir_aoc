@@ -3,16 +3,17 @@ defmodule Aoc.Year2019.Day07.AmplificationCircuitTest do
   doctest Aoc.Year2019.Day07.AmplificationCircuit, import: true
 
   alias Aoc.Year2019.Day07.AmplificationCircuit
+  alias Aoc.Year2019.IntcodeComputer
 
   describe "part_1/1" do
     test "examples" do
-      program =
+      computer =
         "3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0"
-        |> String.split(",")
-        |> Enum.map(&String.to_integer/1)
-        |> Arrays.new()
+        |> IntcodeComputer.parse()
+        |> IntcodeComputer.init()
+        |> IntcodeComputer.run()
 
-      assert AmplificationCircuit.run_1([[4, 3, 2, 1, 0]], program) == 43210
+      assert AmplificationCircuit.run_1([[4, 3, 2, 1, 0]], computer) == 43210
     end
 
     @tag day: 07, year: 2019
@@ -26,19 +27,20 @@ defmodule Aoc.Year2019.Day07.AmplificationCircuitTest do
       input =
         "3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5"
 
-      program =
-        input
-        |> String.split(",")
-        |> Enum.map(&String.to_integer/1)
-        |> Arrays.new()
+      computer = input |> IntcodeComputer.parse() |> IntcodeComputer.init()
 
-      assert AmplificationCircuit.run_loop([9, 8, 7, 6, 5], [
-               program,
-               program,
-               program,
-               program,
-               program
-             ]) == 139_629_729
+      assert AmplificationCircuit.run_loop(
+               [9, 8, 7, 6, 5],
+               [
+                 computer,
+                 computer,
+                 computer,
+                 computer,
+                 computer
+               ],
+               0,
+               true
+             ) == 139_629_729
 
       assert AmplificationCircuit.part_2(input) == 139_629_729
     end

@@ -66,75 +66,70 @@ defmodule Aoc.Year2019.Day07.AmplificationCircuit do
 
   """
 
-  import Aoc.Year2019.Day05.SunnywithaChanceofAsteroids
+  alias Aoc.Year2019.IntcodeComputer
 
   @doc """
 
   """
   def part_1(input) do
-    program = input |> parse
+    computer = input |> IntcodeComputer.parse() |> IntcodeComputer.init() |> IntcodeComputer.run()
 
-    permutations([4, 3, 2, 1, 0]) |> Enum.to_list() |> run_1(program)
+    permutations([4, 3, 2, 1, 0]) |> Enum.to_list() |> run_1(computer)
   end
 
-  def permutations([]), do: [[]]
+  def run_1(combinations, computer, max \\ 0)
+  def run_1([], _computer, max), do: max
 
-  def permutations(list),
-    do: for(elem <- list, rest <- permutations(list -- [elem]), do: [elem | rest])
-
-  def run_1(combinations, program, max \\ 0)
-  def run_1([], _program, max), do: max
-
-  def run_1([parameters | tail], program, max) do
+  def run_1([parameters | tail], computer, max) do
     output =
       Enum.reduce(parameters, 0, fn parameter, input ->
-        case run(program, [parameter, input]) do
-          {:needs_input, [out], _, _} ->
+        case IntcodeComputer.feed(computer, [parameter, input]) do
+          %IntcodeComputer{state: :waiting, outputs: [out]} ->
             out
 
-          {:halt, [out]} ->
+          %IntcodeComputer{state: :halt, outputs: [out]} ->
             out
         end
       end)
 
-    run_1(tail, program, Enum.max([max, output]))
+    run_1(tail, computer, Enum.max([max, output]))
   end
 
   @doc """
 
   """
   def part_2(input) do
-    program = input |> parse
+    computer = input |> IntcodeComputer.parse() |> IntcodeComputer.init() |> IntcodeComputer.run()
 
-    permutations([9, 8, 7, 6, 5]) |> Enum.to_list() |> run_2(program)
+    permutations([9, 8, 7, 6, 5]) |> Enum.to_list() |> run_2(computer)
   end
 
-  def run_2(combinations, program, max \\ 0)
-  def run_2([], _program, max), do: max
+  def run_2(combinations, computer, max \\ 0)
+  def run_2([], _computer, max), do: max
 
-  def run_2([parameters | tail], program, max) do
-    programs = [program, program, program, program, program]
-    output = run_loop(parameters, programs)
+  def run_2([parameters | tail], computer, max) do
+    computers = [computer, computer, computer, computer, computer]
+    output = run_loop(parameters, computers, 0, true)
 
-    run_2(tail, program, Enum.max([max, output]))
+    run_2(tail, computer, Enum.max([max, output]))
   end
 
-  def run_loop(parameters, programs, pcs \\ [0, 0, 0, 0, 0], initial \\ 0, init \\ true)
+  def run_loop(parameters, computers, initial \\ 0, init \\ false)
 
-  def run_loop(parameters, programs, pcs, initial, init) do
-    zipped = Enum.zip([parameters, programs, pcs])
+  def run_loop(parameters, computers, initial, init) do
+    zipped = Enum.zip([parameters, computers])
 
-    {output, programs, pcs, halt} =
-      Enum.reduce(zipped, {initial, [], [], nil}, fn {parameter, program, pc},
-                                                     {input, programs, pcs, _halt} ->
+    {output, computers, halt} =
+      Enum.reduce(zipped, {initial, [], false}, fn {parameter, computer},
+                                                   {input, computers, _halt} ->
         inputs = if init, do: [parameter, input], else: [input]
 
-        case run(program, inputs, [], pc) do
-          {:needs_input, [out], program, pc} ->
-            {out, programs ++ [program], pcs ++ [pc], false}
+        case IntcodeComputer.feed(computer, inputs) |> IntcodeComputer.consume() do
+          {computer = %IntcodeComputer{state: :waiting}, [out]} ->
+            {out, computers ++ [computer], false}
 
-          {:halt, [out]} ->
-            {out, programs ++ [program], pcs ++ [0], true}
+          {computer = %IntcodeComputer{state: :halt}, [out]} ->
+            {out, computers ++ [computer], true}
         end
       end)
 
@@ -143,7 +138,12 @@ defmodule Aoc.Year2019.Day07.AmplificationCircuit do
         output
 
       false ->
-        run_loop(parameters, programs, pcs, output, false)
+        run_loop(parameters, computers, output)
     end
   end
+
+  def permutations([]), do: [[]]
+
+  def permutations(list),
+    do: for(elem <- list, rest <- permutations(list -- [elem]), do: [elem | rest])
 end

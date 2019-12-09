@@ -91,14 +91,19 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
 
   """
 
+  alias Aoc.Year2019.IntcodeComputer
+
   @doc """
 
   """
   def part_1(input) do
-    program = input |> parse
+    computer =
+      input |> IntcodeComputer.parse() |> IntcodeComputer.init([1]) |> IntcodeComputer.run()
 
-    {:halt, outputs} = program |> run([1])
-    outputs
+    case computer do
+      %{outputs: [], state: :halt} -> []
+      %{outputs: outputs, state: :halt} -> outputs |> List.last()
+    end
   end
 
   def run(program, inputs, outputs \\ [], pc \\ 0) do
@@ -218,10 +223,13 @@ defmodule Aoc.Year2019.Day05.SunnywithaChanceofAsteroids do
 
   """
   def part_2(input) do
-    program = input |> parse
+    computer =
+      input |> IntcodeComputer.parse() |> IntcodeComputer.init([5]) |> IntcodeComputer.run()
 
-    {:halt, outputs} = program |> run([5])
-    outputs
+    case computer do
+      %{outputs: [], state: :halt} -> []
+      %{outputs: outputs, state: :halt} -> outputs |> List.last()
+    end
   end
 
   def parse(input) do
