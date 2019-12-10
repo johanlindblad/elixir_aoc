@@ -6,12 +6,10 @@ defmodule Aoc.Year2019.Day10.MonitoringStationTest do
 
   describe "part_1/1" do
     test "examples" do
-      assert MonitoringStation.blocking({3, 4}, {1, 0}, {2, 2}) == true
-      assert MonitoringStation.blocking({0, 0}, {2, 2}, {4, 4}) == false
-      assert MonitoringStation.blocking({0, 0}, {4, 4}, {2, 2}) == true
-      assert MonitoringStation.blocking({0, 0}, {6, 6}, {2, 2}) == true
-      assert MonitoringStation.blocking({0, 4}, {2, 4}, {3, 4}) == false
-      assert MonitoringStation.blocking({0, 0}, {6, 0}, {2, 0}) == true
+      assert MonitoringStation.points_between({0, 0}, {4, 2}) == [{2, 1}]
+      assert MonitoringStation.points_between({0, 0}, {3, 3}) == [{1, 1}, {2, 2}]
+      assert MonitoringStation.points_between({0, 0}, {-3, -3}) == [{-1, -1}, {-2, -2}]
+      assert MonitoringStation.points_between({0, 0}, {5, 3}) == []
 
       input = ".#..#\n.....\n#####\n....#\n...##"
       asteroids = input |> MonitoringStation.parse()
@@ -40,8 +38,7 @@ defmodule Aoc.Year2019.Day10.MonitoringStationTest do
 
     @tag day: 10, year: 2019
     test "input", %{input: input} do
-      # assert input |> MonitoringStation.part_1() == 282
-      assert input == input
+      assert input |> MonitoringStation.part_1() == 282
     end
   end
 

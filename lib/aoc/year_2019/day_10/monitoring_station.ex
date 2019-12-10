@@ -138,47 +138,27 @@ defmodule Aoc.Year2019.Day10.MonitoringStation do
     max |> asteroids_detected(asteroids)
   end
 
-  def asteroids_detected({col, row}, asteroids) do
-    asteroids |> Enum.count(&visible(&1, {col, row}, asteroids))
+  def asteroids_detected({x, y}, asteroids) do
+    asteroids |> Enum.count(&visible(&1, {x, y}, asteroids))
   end
 
-  def visible({col, row}, {col, row}, _), do: false
+  def visible({x, y}, {x, y}, _), do: false
 
-  def visible(_from = {col, row}, _to = {col2, row2}, asteroids) do
-    # IO.inspect(asteroids |> Enum.filter(&blocking({col, row}, {col2, row2}, &1)))
-    blocking = asteroids |> Enum.count(&blocking({col, row}, {col2, row2}, &1))
-    blocking == 0
+  def visible(from, to, asteroids) do
+    false ==
+      points_between(from, to)
+      |> Enum.any?(fn point -> MapSet.member?(asteroids, point) end)
   end
 
-  def blocking({col, row}, _, {col, row}), do: false
-  def blocking(_, {col2, row2}, {col2, row2}), do: false
+  def points_between({x1, y1}, {x2, y2}) do
+    {dx, dy} = {x2 - x1, y2 - y1}
+    gcd = Integer.gcd(dx, dy)
+    {sx, sy} = {div(dx, gcd), div(dy, gcd)}
+    num = if sx != 0, do: div(dx, sx) - 1, else: div(dy, sy) - 1
 
-  def blocking({col, row}, {col2, row2}, {mcol, mrow}) do
-    # https://stackoverflow.com/questions/11907947/how-to-check-if-a-point-lies-on-a-line-between-2-other-points
-    dxc = mcol - col
-    dyc = mrow - row
-    dxl = col2 - col
-    dyl = row2 - row
-
-    cross = dxc * dyl - dyc * dxl
-
-    if cross != 0 do
-      false
-    else
-      if abs(dyl) >= abs(dxl) do
-        if dyl > 0 do
-          row <= mrow && mrow <= row2
-        else
-          row2 <= mrow && mrow <= row
-        end
-      else
-        if dxl > 0 do
-          col <= mcol && mcol <= col2
-        else
-          col2 <= mcol && mcol <= col
-        end
-      end
-    end
+    1..num
+    |> Enum.map(fn ratio -> {x1 + sx * ratio, y1 + sy * ratio} end)
+    |> Enum.take(num)
   end
 
   @doc """
@@ -190,8 +170,8 @@ defmodule Aoc.Year2019.Day10.MonitoringStation do
     asteroids = MapSet.delete(asteroids, max)
 
     asteroids = vaporize(asteroids, max, 202)
-    {col, row} = asteroids |> Enum.at(200 - 1)
-    col * 100 + row
+    {x, y} = asteroids |> Enum.at(200 - 1)
+    x * 100 + y
   end
 
   def vaporize(asteroids, laser, remaining),
@@ -201,61 +181,47 @@ defmodule Aoc.Year2019.Day10.MonitoringStation do
   def vaporize(_, _, _, 0, removed), do: removed
 
   def vaporize(asteroids, laser, laser_angle, remaining, removed) do
-    case MapSet.size(asteroids) do
-      0 ->
-        removed
+    angles =
+      Enum.filter(asteroids, &visible(laser, &1, asteroids))
+      |> Enum.map(fn {x, y} ->
+        angle = angle({x, y}, laser)
+        relative_angle = (angle - laser_angle) |> positive_angle
+        {relative_angle, angle, {x, y}}
+      end)
 
-      _ ->
-        angles =
-          Enum.filter(asteroids, &visible(laser, &1, asteroids))
-          |> Enum.map(fn {col, row} ->
-            {angle({col, row}, laser), {col, row}}
-          end)
+    {_relative_angle, angle, coord} =
+      Enum.min_by(angles, fn {relative_angle, _angle, _coord} ->
+        relative_angle
+      end)
 
-        filtered =
-          Enum.filter(angles, fn {angle, _pos} ->
-            angle - laser_angle >= 0
-          end)
+    asteroids = MapSet.delete(asteroids, coord)
+    remaining = Enum.min([remaining - 1, MapSet.size(asteroids)])
 
-        {angle, coord} =
-          case filtered do
-            [] ->
-              Enum.min_by(angles, fn {angle, _coord} ->
-                angle - laser_angle
-              end)
-
-            _ ->
-              Enum.min_by(filtered, fn {angle, _coord} ->
-                angle - laser_angle
-              end)
-          end
-
-        asteroids = MapSet.delete(asteroids, coord)
-
-        vaporize(asteroids, laser, angle + 0.00000000000001, remaining - 1, removed ++ [coord])
-    end
+    vaporize(asteroids, laser, angle + 0.00000000000001, remaining, removed ++ [coord])
   end
 
   def angle({x, y}, {mid_x, mid_y}) do
-    :math.atan2(mid_y - y, mid_x - x)
+    :math.atan2(mid_y - y, mid_x - x) |> positive_angle
   end
 
+  def positive_angle(angle) when angle < 0, do: angle + 2 * :math.pi()
+  def positive_angle(angle), do: angle
+
   def parse(input) do
-    # row, col
     input
     |> String.split("\n")
     |> Enum.with_index()
-    |> Enum.map(fn {str, num} -> parse_row(str, num) end)
+    |> Enum.map(fn {str, y} -> parse_row(str, y) end)
     |> Enum.reduce(MapSet.new(), &MapSet.union/2)
   end
 
-  defp parse_row(row, row_num) do
+  defp parse_row(row, y) do
     row
     |> String.graphemes()
     |> Enum.map(&(&1 == "#"))
     |> Enum.with_index()
-    |> Enum.filter(fn {val, _pos} -> val end)
-    |> Enum.map(fn {_val, pos} -> {pos, row_num} end)
+    |> Enum.filter(fn {val, _} -> val end)
+    |> Enum.map(fn {_val, x} -> {x, y} end)
     |> Enum.reduce(MapSet.new(), &MapSet.put(&2, &1))
   end
 end
