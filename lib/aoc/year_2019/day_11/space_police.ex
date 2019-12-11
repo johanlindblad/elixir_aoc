@@ -103,6 +103,7 @@ defmodule Aoc.Year2019.Day11.SpacePolice do
       |> IntcodeComputer.init()
       |> IntcodeComputer.run()
 
+    # run(computer) |> to_s |> IO.puts()
     run(computer) |> map_size()
   end
 
@@ -138,12 +139,18 @@ defmodule Aoc.Year2019.Day11.SpacePolice do
     board = Map.put(%{}, {0, 0}, 1)
     board = run(computer, {0, -1}, {0, 0}, board)
 
+    # board |> to_s |> IO.puts()
+    to_s(board)
+  end
+
+  def to_s(board) do
     {{min_x, _}, {max_x, _}} = Map.keys(board) |> Enum.min_max_by(fn {x, _y} -> x end)
     {{_, min_y}, {_, max_y}} = Map.keys(board) |> Enum.min_max_by(fn {_x, y} -> y end)
 
-    min_y..max_y
-    |> Enum.map(&print_row(board, &1, min_x, max_x))
-    |> Enum.join("\n")
+    "\n" <>
+      (min_y..max_y
+       |> Enum.map(&print_row(board, &1, min_x, max_x))
+       |> Enum.join("\n"))
   end
 
   def print_row(board, y, min_x, max_x) do
@@ -153,5 +160,5 @@ defmodule Aoc.Year2019.Day11.SpacePolice do
   end
 
   def char(0), do: " "
-  def char(1), do: "#"
+  def char(1), do: "█"
 end

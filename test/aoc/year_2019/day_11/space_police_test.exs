@@ -28,7 +28,7 @@ defmodule Aoc.Year2019.Day11.SpacePoliceTest do
     @tag day: 11, year: 2019
     test "input", %{input: input} do
       assert input |> SpacePolice.part_2() ==
-               " ###    ## ###  #  # #      ## #  # ###    \n #  #    # #  # # #  #       # #  # #  #   \n ###     # #  # ##   #       # #  # #  #   \n #  #    # ###  # #  #       # #  # ###    \n #  # #  # # #  # #  #    #  # #  # #      \n ###   ##  #  # #  # ####  ##   ##  #      "
+               "\n ███    ██ ███  █  █ █      ██ █  █ ███    \n █  █    █ █  █ █ █  █       █ █  █ █  █   \n ███     █ █  █ ██   █       █ █  █ █  █   \n █  █    █ ███  █ █  █       █ █  █ ███    \n █  █ █  █ █ █  █ █  █    █  █ █  █ █      \n ███   ██  █  █ █  █ ████  ██   ██  █      "
     end
   end
 end
