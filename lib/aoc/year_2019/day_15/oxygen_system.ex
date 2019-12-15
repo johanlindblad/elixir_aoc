@@ -110,72 +110,40 @@ defmodule Aoc.Year2019.Day15.OxygenSystem do
       |> IntcodeComputer.init()
       |> IntcodeComputer.run()
 
-    {_maze, distance} = discover(computer)
+    {_maze, _system, steps} = bfs_discover([{{0, 0}, 0, computer, @open}], %{{0, 0} => @open})
 
-    # {maze, _} = discover(computer)
-    # maze |> Map.put({0, 0}, "*") |> to_s |> IO.puts()
-
-    distance
+    steps
   end
 
-  def discover(
-        computer,
-        {x, y} \\ {0, 0},
-        maze \\ %{{0, 0} => 0},
-        history \\ [],
-        distance \\ 0
-      ) do
-    options = [1, 2, 3, 4]
-    except = if history == [], do: nil, else: opposite(hd(history))
-    options = List.delete(options, except)
+  def bfs_discover(queue, maze, system \\ nil)
 
-    {maze, direction, found, new_computer} =
-      Enum.reduce_while(options, {maze, nil, false, nil}, fn direction, {maze, nil, found, nil} ->
-        visited = Map.get(maze, move({x, y}, direction)) != nil
+  def bfs_discover([], maze, _system = {{x, y}, steps}) do
+    {maze, {x, y}, steps}
+  end
 
-        case visited do
-          true ->
-            {:cont, {maze, nil, found, nil}}
+  def bfs_discover([{{x, y}, steps, computer, _tile} | rest], maze, system) do
+    {maze, queue, system} =
+      [1, 2, 3, 4]
+      |> Enum.reject(&Map.has_key?(maze, move({x, y}, &1)))
+      |> Enum.reduce({maze, rest, system}, fn direction, {maze, queue, system} ->
+        {computer, [status]} =
+          IntcodeComputer.feed(computer, [direction]) |> IntcodeComputer.consume()
 
-          false ->
-            {new_computer, [status]} =
-              IntcodeComputer.feed(computer, [direction]) |> IntcodeComputer.consume()
+        case status do
+          @wall ->
+            maze = Map.put(maze, move({x, y}, direction), @wall)
+            {maze, queue, system}
 
-            case status do
-              @open ->
-                {:halt,
-                 {Map.put(maze, move({x, y}, direction), @open), direction, found, new_computer}}
-
-              @wall ->
-                {:cont, {Map.put(maze, move({x, y}, direction), @wall), nil, found, nil}}
-
-              @system ->
-                {:cont, {Map.put(maze, move({x, y}, direction), @system), nil, true, nil}}
-            end
+          tile ->
+            {x, y} = move({x, y}, direction)
+            maze = Map.put(maze, {x, y}, tile)
+            queue = queue ++ [{{x, y}, steps + 1, computer, tile}]
+            system = if tile == @system, do: {{x, y}, steps + 1}, else: system
+            {maze, queue, system}
         end
       end)
 
-    distance = if found, do: 1 + length(history), else: distance
-
-    case direction do
-      nil ->
-        [last | rest] = history
-        backtrack = opposite(last)
-
-        {computer, [@open]} =
-          IntcodeComputer.feed(computer, [backtrack]) |> IntcodeComputer.consume()
-
-        case rest do
-          [] ->
-            {maze, distance}
-
-          _some ->
-            discover(computer, move({x, y}, backtrack), maze, rest, distance)
-        end
-
-      _some_direction ->
-        discover(new_computer, move({x, y}, direction), maze, [direction | history], distance)
-    end
+    bfs_discover(queue, maze, system)
   end
 
   defp effect(1), do: {0, -1}
@@ -188,11 +156,6 @@ defmodule Aoc.Year2019.Day15.OxygenSystem do
     {x + dx, y + dy}
   end
 
-  defp opposite(1), do: 2
-  defp opposite(2), do: 1
-  defp opposite(3), do: 4
-  defp opposite(4), do: 3
-
   @doc """
 
   """
@@ -203,9 +166,8 @@ defmodule Aoc.Year2019.Day15.OxygenSystem do
       |> IntcodeComputer.init()
       |> IntcodeComputer.run()
 
-    {maze, _distance} = discover(computer)
-
-    {{x, y}, @system} = Enum.find(maze, fn {_, tile} -> tile == @system end)
+    {maze, _system = {x, y}, _steps} =
+      bfs_discover([{{0, 0}, 0, computer, @open}], %{{0, 0} => @open})
 
     maze
     |> Map.put({x, y}, @oxygen)
@@ -259,7 +221,9 @@ defmodule Aoc.Year2019.Day15.OxygenSystem do
 
   def print_row(board, y, min_x, max_x) do
     min_x..max_x
-    |> Enum.map(fn x -> char(Map.get(board, {x, y})) end)
+    |> Enum.map(fn x ->
+      Map.get(board, {x, y}, @wall) |> char
+    end)
     |> Enum.join("")
   end
 
@@ -267,10 +231,6 @@ defmodule Aoc.Year2019.Day15.OxygenSystem do
   def char(0), do: "█"
   def char(2), do: "@"
   def char(nil), do: "█"
-  def char({0, -1}), do: "^"
-  def char({0, 1}), do: "v"
-  def char({-1, 0}), do: "<"
-  def char({1, 0}), do: ">"
 
   def char(char), do: char
 end
