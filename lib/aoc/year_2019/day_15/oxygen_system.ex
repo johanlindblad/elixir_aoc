@@ -169,43 +169,29 @@ defmodule Aoc.Year2019.Day15.OxygenSystem do
     {maze, _system = {x, y}, _steps} =
       bfs_discover([{{0, 0}, 0, computer, @open}], %{{0, 0} => @open})
 
-    maze
-    |> Map.put({x, y}, @oxygen)
-    |> Enum.filter(fn {_, tile} -> tile == @open || tile == @oxygen end)
-    |> Map.new()
-    |> oxygen_time
+    flood_fill([{{x, y}, 0}], Map.put(maze, {x, y}, @open))
   end
 
-  def oxygen_time(maze, time \\ 1) do
-    expanded =
-      Enum.reduce(Map.keys(maze), maze, fn {x, y}, new_maze ->
-        case maze[{x, y}] do
-          @oxygen ->
-            new_maze
+  def flood_fill([{{x, y}, steps} | rest], maze) do
+    {maze, queue} =
+      [1, 2, 3, 4]
+      |> Enum.reject(fn direction -> Map.get(maze, move({x, y}, direction)) == @oxygen end)
+      |> Enum.reduce({maze, rest}, fn direction, {maze, queue} ->
+        case Map.get(maze, move({x, y}, direction)) do
+          @wall ->
+            {maze, queue}
 
           @open ->
-            adjacent = [1, 2, 3, 4] |> Enum.map(&move({x, y}, &1))
-
-            fills =
-              Enum.any?(adjacent, fn {x, y} ->
-                Map.get(maze, {x, y}) == @oxygen
-              end)
-
-            case fills do
-              true ->
-                Map.put(new_maze, {x, y}, @oxygen)
-
-              false ->
-                new_maze
-            end
+            {x, y} = move({x, y}, direction)
+            maze = Map.put(maze, {x, y}, @oxygen)
+            queue = queue ++ [{{x, y}, steps + 1}]
+            {maze, queue}
         end
       end)
 
-    left = Map.values(expanded) |> Enum.any?(fn tile -> tile == @open end)
-
-    case left do
-      true -> oxygen_time(expanded, 1 + time)
-      false -> time
+    case queue do
+      [] -> steps
+      _some_queue -> flood_fill(queue, maze)
     end
   end
 
