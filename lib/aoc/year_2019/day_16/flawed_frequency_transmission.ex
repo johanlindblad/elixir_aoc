@@ -147,49 +147,28 @@ defmodule Aoc.Year2019.Day16.FlawedFrequencyTransmission do
 
     # IO.puts(list |> Enum.join("") |> String.length())
 
-    latter_half_fft(list, offset, 100) |> Enum.take(8) |> Enum.join("")
+    latter_half_fft(list, 100) |> Enum.take(8) |> Enum.join("")
   end
 
   def parse(input) do
     input |> String.graphemes() |> Enum.map(&String.to_integer/1)
   end
 
-  def latter_half_fft(input, _first_index, 0), do: input
+  def latter_half_fft(input, 0), do: input
 
-  def latter_half_fft(input, first_index, steps) do
-    latter_half_fft_step(input, first_index)
-    |> latter_half_fft(first_index, steps - 1)
+  def latter_half_fft(input, steps) do
+    latter_half_fft_step(input)
+    |> latter_half_fft(steps - 1)
   end
 
-  def latter_half_fft_step(input, first_index, acc \\ [])
+  def latter_half_fft_step(input) do
+    sum = Enum.sum(input) |> Integer.mod(10)
 
-  def latter_half_fft_step(input = [number | rest], first_index, acc) do
-    sum = Enum.take(input, first_index + 1) |> Enum.sum() |> abs |> rem(10)
-
-    lookahead = rest |> Enum.drop(first_index)
-
-    latter_half_fft_step(rest, first_index + 1, [sum | acc], number, lookahead)
-  end
-
-  def latter_half_fft_step([], _first_index, acc, _, _), do: Enum.reverse(acc)
-
-  def latter_half_fft_step(
-        [number | rest],
-        first_index,
-        acc = [last_sum | _rest],
-        last_number,
-        []
-      ) do
-    sum = (last_sum - last_number) |> Integer.mod(10)
-
-    latter_half_fft_step(rest, first_index + 1, [sum | acc], number, [])
-  end
-
-  def latter_half_fft_step([number | rest], first_index, acc = [last_sum | _rest], last_number, [
-        add | lookahead
-      ]) do
-    sum = (last_sum - last_number + add) |> Integer.mod(10)
-
-    latter_half_fft_step(rest, first_index + 1, [sum | acc], number, lookahead)
+    input
+    |> Enum.reduce([sum], fn number, acc = [sum | _rest] ->
+      [Integer.mod(sum - number, 10) | acc]
+    end)
+    |> Enum.drop(1)
+    |> Enum.reverse()
   end
 end

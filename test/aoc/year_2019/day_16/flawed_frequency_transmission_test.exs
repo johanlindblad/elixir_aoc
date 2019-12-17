@@ -28,8 +28,8 @@ defmodule Aoc.Year2019.Day16.FlawedFrequencyTransmissionTest do
   describe "part_2/1" do
     @tag timeout: :infinity
     test "examples" do
-      assert FlawedFrequencyTransmission.latter_half_fft([4, 5, 6, 7, 8], 3, 1) == [2, 6, 1, 5, 8]
-      assert FlawedFrequencyTransmission.latter_half_fft([4, 5, 6, 7, 8], 3, 2) == [4, 0, 4, 3, 8]
+      assert FlawedFrequencyTransmission.latter_half_fft([5, 6, 7, 8], 1) == [6, 1, 5, 8]
+      assert FlawedFrequencyTransmission.latter_half_fft([5, 6, 7, 8], 2) == [0, 4, 3, 8]
       assert FlawedFrequencyTransmission.part_2("03036732577212944063491565474664") == "84462026"
     end
 
