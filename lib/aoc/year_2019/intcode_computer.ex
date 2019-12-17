@@ -62,6 +62,10 @@ defmodule Aoc.Year2019.IntcodeComputer do
 
   def input(computer = %{memory: memory, offset: offset, pc: pc}, {opa, _, _}, {mode1, _, _}) do
     case computer.inputs do
+      [input | inputs] when is_binary(input) ->
+        <<int::utf8>> = input
+        %{computer | memory: write(memory, opa, mode1, offset, int), inputs: inputs, pc: pc + 2}
+
       [input | inputs] ->
         %{computer | memory: write(memory, opa, mode1, offset, input), inputs: inputs, pc: pc + 2}
 
