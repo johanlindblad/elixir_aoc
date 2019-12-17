@@ -39,7 +39,9 @@ defmodule Aoc.Year2019.Day17.SetandForgetTest do
       moves =
         "L,4,L,6,L,8,L,12,L,8,R,12,L,12,L,8,R,12,L,12,L,4,L,6,L,8,L,12,L,8,R,12,L,12,R,12,L,6,L,6,L,8,L,4,L,6,L,8,L,12,R,12,L,6,L,6,L,8,L,8,R,12,L,12,R,12,L,6,L,6,L,8"
 
-      # assert SetandForget.compress(moves) == {"A,B,B,A,B,C,A,C,B,C", "L,4,L,6,L,8,L,12", "L,8,R,12,L,12", "R,12,L,6,L,6,L,8"}
+      assert SetandForget.compress(moves) ==
+               {"A,B,B,A,B,C,A,C,B,C", ["L,4,L,6,L,8,L,12", "L,8,R,12,L,12", "R,12,L,6,L,6,L,8"],
+                ["A", "B", "C"]}
     end
 
     @tag day: 17, year: 2019

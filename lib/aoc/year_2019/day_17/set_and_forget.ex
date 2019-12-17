@@ -74,6 +74,15 @@ defmodule Aoc.Year2019.Day17.SetandForget do
   alias Aoc.Year2019.IntcodeComputer
 
   def part_1(input) do
+    # IO.puts(rle(moves) |> Enum.join(", "))
+    {intersections, _} = intersections_and_moves(input)
+
+    intersections
+    |> Enum.map(fn {x, y} -> x * y end)
+    |> Enum.sum()
+  end
+
+  def intersections_and_moves(input) do
     computer =
       input
       |> IntcodeComputer.parse()
@@ -86,14 +95,7 @@ defmodule Aoc.Year2019.Day17.SetandForget do
 
     {map, robot, robot_direction} = parse(rows)
 
-    {intersections, moves} = step(map, robot, robot_direction)
-
-    # IO.inspect(moves)
-    IO.puts(rle(moves) |> Enum.join(", "))
-
-    intersections
-    |> Enum.map(fn {x, y} -> x * y end)
-    |> Enum.sum()
+    {_intersections, _moves} = step(map, robot, robot_direction)
   end
 
   def parse(output, map \\ %{}, robot \\ nil, robot_direction \\ nil, y \\ 0)
@@ -183,11 +185,17 @@ defmodule Aoc.Year2019.Day17.SetandForget do
       |> IntcodeComputer.init()
       |> IntcodeComputer.run()
 
+    {_, moves} = intersections_and_moves(input)
+
+    path = rle(moves) |> Enum.join(", ")
+
+    {moves, [a, b, c], _} = compress(path, ["A", "B", "C"])
+
     {computer, output} = IntcodeComputer.consume(computer)
-    moves = "A,B,B,A,B,C,A,C,B,C\n" |> String.graphemes()
-    a = "L,4,L,6,L,8,L,12\n" |> String.graphemes()
-    b = "L,8,R,12,L,12\n" |> String.graphemes()
-    c = "R,12,L,6,L,6,L,8\n" |> String.graphemes()
+    moves = (moves <> "\n") |> String.graphemes()
+    a = (a <> "\n") |> String.graphemes()
+    b = (b <> "\n") |> String.graphemes()
+    c = (c <> "\n") |> String.graphemes()
     yn = "n\n" |> String.graphemes()
 
     computer = IntcodeComputer.feed(computer, moves ++ a ++ b ++ c ++ yn)
@@ -227,26 +235,55 @@ defmodule Aoc.Year2019.Day17.SetandForget do
   def char(true), do: "#"
   def char(false), do: " "
 
-  def compress(string) do
-    first_two = string |> String.split(",") |> Enum.take(2) |> Enum.join(",")
+  @vars ["A", "B", "C"]
 
-    [empty | parts] = String.split(string, first_two)
-    a_lcp = lcp(parts) |> String.trim(",")
-    a = first_two <> "," <> a_lcp
+  def compress(string, vars_left \\ ["A", "B", "C"], vars_used \\ [], values \\ [])
 
-    remaining =
-      parts |> Enum.map(fn part -> String.replace(part, a_lcp, "") |> String.trim(",") end)
-
-    IO.inspect(remaining)
+  def compress(string, [], vars_used, values) do
+    string
+    |> String.split(",")
+    |> Enum.filter(fn part ->
+      Enum.find(vars_used, fn var -> part == var end) == nil
+    end)
+    |> Enum.empty?()
   end
 
-  def lcp(strs) do
-    min = Enum.min(strs)
-    max = Enum.max(strs)
+  def compress(string, [next_var | vars_left], vars_used, values) do
+    parts =
+      String.split(string, ",")
+      |> Enum.drop_while(fn elem ->
+        Enum.find(vars_used, fn val -> val == elem end)
+      end)
 
-    index =
-      Enum.find_index(0..String.length(min), fn i -> String.at(min, i) != String.at(max, i) end)
+    string = parts |> Enum.join(",")
 
-    if index, do: String.slice(min, 0, index), else: min
+    1..10
+    |> Enum.find_value(fn len ->
+      {var_parts, rest} = Enum.split(parts, len)
+      var = Enum.join(var_parts, ",")
+
+      string = string |> String.replace(var, next_var)
+      parts = String.split(string, ",")
+
+      case compress(string, vars_left, [next_var | vars_used], [var | values]) do
+        {_str, vals, vars} ->
+          vals = [var | vals]
+          vars = [next_var | vars]
+          zipped = Enum.zip(vars, vals)
+
+          out =
+            Enum.reduce(zipped, string, fn {var, val}, string ->
+              string |> String.replace(val, var)
+            end)
+
+          {out, vals, vars}
+
+        true ->
+          {"", [var], [next_var]}
+
+        _ ->
+          false
+      end
+    end)
   end
 end
