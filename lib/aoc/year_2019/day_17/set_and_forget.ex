@@ -89,7 +89,7 @@ defmodule Aoc.Year2019.Day17.SetandForget do
       |> IntcodeComputer.init()
       |> IntcodeComputer.run()
 
-    {computer, output} = IntcodeComputer.consume(computer)
+    {_computer, output} = IntcodeComputer.consume(computer)
 
     rows = output |> to_string() |> String.split("\n")
 
@@ -106,7 +106,7 @@ defmodule Aoc.Year2019.Day17.SetandForget do
       row
       |> String.graphemes()
       |> Enum.with_index()
-      |> Enum.filter(fn {char, x} -> char != "." end)
+      |> Enum.filter(fn {char, _x} -> char != "." end)
       |> Enum.reduce({map, robot, robot_direction}, fn {char, x}, {map, robot, robot_direction} ->
         {robot, robot_direction} =
           case robot?(char) do
@@ -191,7 +191,7 @@ defmodule Aoc.Year2019.Day17.SetandForget do
 
     {moves, [a, b, c], _} = compress(path, ["A", "B", "C"])
 
-    {computer, output} = IntcodeComputer.consume(computer)
+    {computer, _output} = IntcodeComputer.consume(computer)
     moves = (moves <> "\n") |> String.graphemes()
     a = (a <> "\n") |> String.graphemes()
     b = (b <> "\n") |> String.graphemes()
@@ -200,7 +200,7 @@ defmodule Aoc.Year2019.Day17.SetandForget do
 
     computer = IntcodeComputer.feed(computer, moves ++ a ++ b ++ c ++ yn)
 
-    {computer, output} = IntcodeComputer.consume(computer)
+    {_computer, output} = IntcodeComputer.consume(computer)
     output |> List.last()
   end
 
@@ -235,11 +235,9 @@ defmodule Aoc.Year2019.Day17.SetandForget do
   def char(true), do: "#"
   def char(false), do: " "
 
-  @vars ["A", "B", "C"]
-
   def compress(string, vars_left \\ ["A", "B", "C"], vars_used \\ [], values \\ [])
 
-  def compress(string, [], vars_used, values) do
+  def compress(string, [], vars_used, _values) do
     string
     |> String.split(",")
     |> Enum.filter(fn part ->
@@ -259,11 +257,11 @@ defmodule Aoc.Year2019.Day17.SetandForget do
 
     1..10
     |> Enum.find_value(fn len ->
-      {var_parts, rest} = Enum.split(parts, len)
+      {var_parts, _rest} = Enum.split(parts, len)
       var = Enum.join(var_parts, ",")
 
       string = string |> String.replace(var, next_var)
-      parts = String.split(string, ",")
+      _parts = String.split(string, ",")
 
       case compress(string, vars_left, [next_var | vars_used], [var | values]) do
         {_str, vals, vars} ->
