@@ -96,39 +96,32 @@ defmodule Aoc.Year2019.Day19.TractorBeam do
 
   @width 100
   def run2(computer, y, start_x \\ 0) do
-    {width, _, new_start_x} =
-      Stream.iterate(start_x, fn start_x -> start_x + 1 end)
-      |> Enum.reduce_while({0, false, 0}, fn x, {width, found, new_start_x} ->
+    new_start_x =
+      start_x..(start_x + 20)
+      |> Enum.find(fn x ->
         {_computer, [result]} =
           IntcodeComputer.feed(computer, [x, y]) |> IntcodeComputer.consume()
 
-        case {result, found, x} do
-          {1, false, _} -> {:cont, {1, true, x}}
-          {1, true, _} -> {:cont, {1 + width, true, new_start_x}}
-          {_, _, x} when x - start_x > 30 -> {:halt, {width, found, new_start_x}}
-          {0, false, _} -> {:cont, {0, false, new_start_x}}
-          {0, true, _} -> {:halt, {width, true, new_start_x}}
-        end
+        result == 1
       end)
 
-    cond do
-      width < @width ->
-        run2(computer, y + 1, Enum.max([start_x, new_start_x]))
+    case {new_start_x, y} do
+      {nil, y} ->
+        run2(computer, y + 1, start_x)
 
-      width >= @width ->
-        right_most_x = new_start_x + width - 1
-        {rx, ly} = {right_most_x, y + @width - 1}
-        lx = right_most_x - @width + 1
+      {x, y} when y < 100 ->
+        run2(computer, y + 1, x)
 
-        {_computer2, [left]} =
-          IntcodeComputer.feed(computer, [lx, ly]) |> IntcodeComputer.consume()
+      {_some_x, _y} ->
+        upper_left = {new_start_x + @width - 1, y - @width + 1}
+        {ux, uy} = upper_left
 
-        {_computer2, [right]} =
-          IntcodeComputer.feed(computer, [rx, ly]) |> IntcodeComputer.consume()
+        {_computer, [result]} =
+          IntcodeComputer.feed(computer, [ux, uy]) |> IntcodeComputer.consume()
 
-        case {left, right} do
-          {1, 1} -> {lx, y}
-          _other -> run2(computer, y + 1, Enum.max([start_x, new_start_x]))
+        case result do
+          1 -> {new_start_x, uy}
+          0 -> run2(computer, y + 1, new_start_x)
         end
     end
   end
