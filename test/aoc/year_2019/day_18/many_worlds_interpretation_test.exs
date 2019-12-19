@@ -28,7 +28,7 @@ defmodule Aoc.Year2019.Day18.ManyWorldsInterpretationTest do
 
     @tag day: 18, year: 2019, timeout: :infinity
     test "input", %{input: input} do
-      assert input |> ManyWorldsInterpretation.part_1() == 0
+      assert input |> ManyWorldsInterpretation.part_1() == 5102
     end
   end
 
@@ -55,7 +55,7 @@ defmodule Aoc.Year2019.Day18.ManyWorldsInterpretationTest do
 
     @tag day: 18, year: 2019, timeout: :infinity
     test "input", %{input: input} do
-      assert input |> ManyWorldsInterpretation.part_2() == input
+      assert input |> ManyWorldsInterpretation.part_2() == 2282
     end
   end
 end

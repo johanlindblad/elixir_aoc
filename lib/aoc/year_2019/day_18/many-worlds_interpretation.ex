@@ -124,7 +124,7 @@ defmodule Aoc.Year2019.Day18.ManyWorldsInterpretation do
     run(map, initial, keys, MapSet.size(keys))
   end
 
-  def run(map, visited, keys, 0) do
+  def run(_map, visited, _keys, 0) do
     visited
     |> Map.values()
     |> Enum.min()
@@ -180,21 +180,23 @@ defmodule Aoc.Year2019.Day18.ManyWorldsInterpretation do
 
               "." ->
                 queue = queue ++ [{{nx, ny}, steps + 1}]
+                visited = MapSet.put(visited, {x, y})
                 {acc, visited, queue}
 
-              <<letter::utf8>> when letter in ?a..?z ->
+              letter = <<code::utf8>> when code in ?a..?z ->
                 # IO.inspect("FOUND #{<<letter>>}")
 
-                {queue, acc} =
-                  case MapSet.member?(keys, <<letter>>) do
+                {queue, visited, acc} =
+                  case MapSet.member?(keys, letter) do
                     true ->
                       queue = queue ++ [{{nx, ny}, steps + 1}]
-                      {queue, acc}
+                      visited = MapSet.put(visited, {nx, ny})
+                      {queue, visited, acc}
 
                     false ->
-                      acc = [{<<letter>>, steps + 1, {nx, ny}} | acc]
+                      acc = [{letter, steps + 1, {nx, ny}} | acc]
                       # queue = queue ++ [{{nx, ny}, steps + 1}]
-                      {queue, acc}
+                      {queue, visited, acc}
                   end
 
                 {acc, visited, queue}
@@ -203,6 +205,7 @@ defmodule Aoc.Year2019.Day18.ManyWorldsInterpretation do
                 case MapSet.member?(keys, String.downcase(letter)) do
                   true ->
                     queue = queue ++ [{{nx, ny}, steps + 1}]
+                    visited = MapSet.put(visited, {nx, ny})
                     {acc, visited, queue}
 
                   false ->
@@ -237,7 +240,7 @@ defmodule Aoc.Year2019.Day18.ManyWorldsInterpretation do
     run2(map, initial, keys, MapSet.size(keys))
   end
 
-  def run2(map, visited, keys, 0) do
+  def run2(_map, visited, _keys, 0) do
     visited
     |> Map.values()
     |> Enum.min()
