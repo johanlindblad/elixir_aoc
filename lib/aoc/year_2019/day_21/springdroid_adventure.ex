@@ -93,12 +93,12 @@ defmodule Aoc.Year2019.Day21.SpringdroidAdventure do
 
   """
   def part_1(input) do
-    program = "OR D J
-    OR A T
-    AND B T
-    AND C T
-    NOT T T
-    AND T J
+    program = "
+    OR A J
+    AND B J
+    AND C J
+    NOT J J
+    AND D J
     WALK
     "
 
@@ -131,12 +131,11 @@ defmodule Aoc.Year2019.Day21.SpringdroidAdventure do
   """
   def part_2(input) do
     program = "
-    OR D J
-    OR A T
-    AND B T
-    AND C T
-    NOT T T
-    AND T J
+    OR A J
+    AND B J
+    AND C J
+    NOT J J
+    AND D J
 
     NOT E T
     AND H T
