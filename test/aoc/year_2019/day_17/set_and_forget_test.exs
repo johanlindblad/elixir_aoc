@@ -18,7 +18,7 @@ defmodule Aoc.Year2019.Day17.SetandForgetTest do
 
       {map, robot, robot_direction} = SetandForget.parse(input)
 
-      {intersections, moves} = SetandForget.step(map, robot, robot_direction)
+      {intersections, _moves} = SetandForget.step(map, robot, robot_direction)
 
       result =
         intersections
