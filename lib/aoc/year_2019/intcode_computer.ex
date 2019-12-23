@@ -41,6 +41,13 @@ defmodule Aoc.Year2019.IntcodeComputer do
     end
   end
 
+  def will_wait(computer = %{inputs: []}) do
+    {opcode, modes} = read_instruction(computer)
+    opcode == 3
+  end
+
+  def will_wait(computer), do: false
+
   def feed(computer = %{inputs: [], state: :waiting}, []), do: computer
 
   def feed(computer = %{inputs: []}, inputs) do
